@@ -71,7 +71,12 @@ Open **[http://localhost:3000](http://localhost:3000)** in your web browser.
 ![Market Basket Affinity & Repeat Cycle](dashboard/screenshots/dashboard_10_affinity_co_purchases_purchase_cycle.png)
 *Top Product Co-Purchases (Market Basket Pairs) and Purchase Cycle Interval Distribution (13.85 days average order cycle).*
 
+#### 6. Detailed Master Data Tables
+![Customers Detail Master Table](dashboard/screenshots/dashboard_11_detailed_tables_master.png)
+*Granular Customer Master Table with search, sorting, pagination, and behavioral cohort badges.*
+
 ---
+
 
 
 ## 🗃️ Database Schema & Data Model
