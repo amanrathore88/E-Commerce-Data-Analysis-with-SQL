@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Commerce Sales & Customer Analytics BI Dashboard</title>
+  <!-- Chart.js and Lucide Icons (Local Assets for 100% Offline Robustness) -->
+  <script src="js/chart.js"></script>
+  <script src="js/lucide.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- App Container -->
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <i data-lucide="shopping-bag" class="brand-icon"></i>
+        <span>E-Shop Analytics</span>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-tab="overview">
+          <i data-lucide="bar-chart-3"></i> Overview & Sales
+        </button>
+        <button class="nav-btn" data-tab="products">
+          <i data-lucide="package"></i> Products & Categories
+        </button>
+        <button class="nav-btn" data-tab="customers">
+          <i data-lucide="users"></i> Customer Analysis
+        </button>
+        <button class="nav-btn" data-tab="retention">
+          <i data-lucide="repeat"></i> Retention & Churn
+        </button>
+        <button class="nav-btn" data-tab="rfm">
+          <i data-lucide="target"></i> RFM & Affinity
+        </button>
+        <button class="nav-btn" data-tab="tables">
+          <i data-lucide="table"></i> Detailed Tables
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="status-indicator online">
+          <span class="dot"></span>
+          <span>Database Connected</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Top Header -->
+      <header class="main-header">
+        <div class="header-title">
+          <h1>E-Commerce Sales & Customer Analytics</h1>
+          <p class="subtitle">Production-Quality Corporate BI Dashboard (SQLite Engine)</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-outline" id="btn-export-csv" title="Export current views to CSV">
+            <i data-lucide="download"></i> Export Data
+          </button>
+          <button class="btn btn-primary" id="btn-clear-filters">
+            <i data-lucide="rotate-ccw"></i> Reset Filters
+          </button>
+        </div>
+      </header>
+
+      <!-- Connection Error Banner -->
+      <div class="notice-banner error hidden" id="api-error-banner" style="margin-bottom: 24px;">
+        <i data-lucide="alert-octagon"></i>
+        <div>
+          <strong>Database API Offline:</strong> Failed to connect to the e-commerce database API. Please make sure that the Node.js server is running (run <code>npm start</code> in the <code>dashboard</code> folder) and listening on port 3000.
+        </div>
+      </div>
+
+      <!-- Global Filter Bar -->
+      <section class="filter-bar-card">
+        <div class="filter-title">
+          <i data-lucide="sliders-horizontal"></i>
+          <span>Global Filter Pane</span>
+        </div>
+        <div class="filters-grid">
+          <!-- Date Range -->
+          <div class="filter-item">
+            <label for="filter-start-date">Start Date</label>
+            <input type="date" id="filter-start-date">
+          </div>
+          <div class="filter-item">
+            <label for="filter-end-date">End Date</label>
+            <input type="date" id="filter-end-date">
+          </div>
+          <!-- City -->
+          <div class="filter-item">
+            <label for="filter-city">City</label>
+            <select id="filter-city">
+              <option value="">All Cities</option>
+            </select>
+          </div>
+          <!-- Customer -->
+          <div class="filter-item">
+            <label for="filter-customer">Customer</label>
+            <select id="filter-customer">
+              <option value="">All Customers</option>
+            </select>
+          </div>
+          <!-- Gender -->
+          <div class="filter-item">
+            <label for="filter-gender">Gender</label>
+            <select id="filter-gender">
+              <option value="">All Genders</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+          <!-- Category -->
+          <div class="filter-item">
+            <label for="filter-category">Category</label>
+            <select id="filter-category">
+              <option value="">All Categories</option>
+            </select>
+          </div>
+          <!-- Product -->
+          <div class="filter-item">
+            <label for="filter-product">Product</label>
+            <select id="filter-product">
+              <option value="">All Products</option>
+            </select>
+          </div>
+          <!-- Order Status -->
+          <div class="filter-item">
+            <label for="filter-status">Order Status</label>
+            <select id="filter-status">
+              <option value="">All Statuses</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- Active Filters Display -->
+        <div class="active-filters-chips" id="active-filters-container">
+          <span class="active-filters-label">Active Filters:</span>
+          <span class="no-active-filters">None (Showing Database Baseline)</span>
+        </div>
+      </section>
+
+      <!-- KPI Cards Row -->
+      <section class="kpi-section">
+        <div class="kpi-grid">
+          <!-- Card 1: Recognized Revenue -->
+          <div class="kpi-card primary">
+            <div class="kpi-header">
+              <span>Recognized Revenue</span>
+              <i data-lucide="circle-check" class="icon-delivered"></i>
+            </div>
+            <div class="kpi-value" id="kpi-recognized-revenue">$0.00</div>
+            <div class="kpi-desc">Delivered orders only. (Accounting baseline)</div>
+          </div>
+          
+          <!-- Card 2: Gross Booking Value -->
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span>Gross Booking Value</span>
+              <i data-lucide="banknote" class="icon-gbv"></i>
+            </div>
+            <div class="kpi-value" id="kpi-gbv">$0.00</div>
+            <div class="kpi-desc">All orders placed. Includes cancels & pending.</div>
+          </div>
+
+          <!-- Card 3: Net Pipeline Value -->
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span>Net Pipeline Value</span>
+              <i data-lucide="truck" class="icon-pipeline"></i>
+            </div>
+            <div class="kpi-value" id="kpi-net-pipeline">$0.00</div>
+            <div class="kpi-desc">Delivered + Pending orders. (Active pipeline)</div>
+          </div>
+
+          <!-- Card 4: Average Order Value -->
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span>Average Order Value (AOV)</span>
+              <i data-lucide="shopping-cart"></i>
+            </div>
+            <div class="kpi-value" id="kpi-aov">$0.00</div>
+            <div class="kpi-desc">Recognized Revenue / Delivered Orders.</div>
+          </div>
+        </div>
+
+        <!-- Collapsible/Secondary KPI Grid -->
+        <div class="secondary-kpis-toggle" id="kpis-toggle-btn">
+          <span>Show Secondary Operations KPIs</span>
+          <i data-lucide="chevron-down"></i>
+        </div>
+        
+        <div class="kpi-grid secondary-kpis-grid hidden" id="secondary-kpis-container">
+          <div class="kpi-card">
+            <div class="kpi-header"><span>Total Orders Placed</span><i data-lucide="hash"></i></div>
+            <div class="kpi-value-small" id="kpi-total-orders">0</div>
+            <div class="kpi-desc">All statuses (Delivered, Pending, Cancelled)</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-header"><span>Delivered Orders</span><i data-lucide="package-check"></i></div>
+            <div class="kpi-value-small" id="kpi-delivered-orders">0</div>
+            <div class="kpi-desc">Completed transactions</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-header"><span>Cancelled Orders</span><i data-lucide="package-x"></i></div>
+            <div class="kpi-value-small" id="kpi-cancelled-orders">0</div>
+            <div class="kpi-desc">Failed bookings</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-header"><span>Cancellation Rate</span><i data-lucide="percent"></i></div>
+            <div class="kpi-value-small" id="kpi-cancellation-rate">0.00%</div>
+            <div class="kpi-desc">Cancelled / Total Orders * 100</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-header"><span>Total Units Sold</span><i data-lucide="package-2"></i></div>
+            <div class="kpi-value-small" id="kpi-units-sold">0</div>
+            <div class="kpi-desc">Units transacted under filters</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-header"><span>Active Buyers Cohort</span><i data-lucide="user-check"></i></div>
+            <div class="kpi-value-small" id="kpi-customers-cohort">0</div>
+            <div class="kpi-desc">Unique purchasing customer count</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-header"><span>Repeat Purchase Rate</span><i data-lucide="refresh-cw"></i></div>
+            <div class="kpi-value-small" id="kpi-repeat-rate">0.00%</div>
+            <div class="kpi-desc">Buyers with >1 Delivered Order / Active Buyers</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-header"><span>Historical CLV (Avg)</span><i data-lucide="award"></i></div>
+            <div class="kpi-value-small" id="kpi-clv">$0.00</div>
+            <div class="kpi-desc">Recognized Revenue / Active Buyers Cohort</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dashboard Sheets Panel -->
+      <section class="sheets-panel">
+        
+        <!-- SHEET 1: Overview & Sales -->
+        <div class="dashboard-sheet active" id="sheet-overview">
+          <div class="charts-row">
+            <!-- Time-Series Chart Card -->
+            <div class="chart-card flex-2">
+              <div class="chart-card-header">
+                <h3>Sales Performance Trend</h3>
+                <div class="chart-controls">
+                  <span class="control-label">Metric:</span>
+                  <button class="btn btn-sm active" id="trend-metric-revenue">Revenue</button>
+                  <button class="btn btn-sm" id="trend-metric-orders">Orders</button>
+                  <button class="btn btn-sm" id="trend-metric-units">Units</button>
+                  
+                  <span class="divider"></span>
+                  <span class="control-label">Interval:</span>
+                  <button class="btn btn-sm active" id="trend-interval-monthly">Monthly</button>
+                  <button class="btn btn-sm" id="trend-interval-daily">Daily</button>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="chart-sales-trend"></canvas>
+              </div>
+            </div>
+
+            <!-- City Performance Card -->
+            <div class="chart-card flex-1">
+              <div class="chart-card-header">
+                <h3>Revenue by Customer City</h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="chart-city-revenue"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="charts-row mt-4">
+            <!-- Cumulative Running Revenue Chart Card -->
+            <div class="chart-card flex-1">
+              <div class="chart-card-header">
+                <h3>Recognized Revenue Accumulation (Running Total)</h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="chart-cumulative-revenue"></canvas>
+              </div>
+            </div>
+            <!-- City Stats Summary Card -->
+            <div class="chart-card flex-1">
+              <div class="chart-card-header">
+                <h3>Geographic Location Leaders</h3>
+              </div>
+              <div class="geo-leaders-list" id="geo-leaders-container">
+                <!-- Javascript will populate this with leaders -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SHEET 2: Products & Categories -->
+        <div class="dashboard-sheet" id="sheet-products">
+          <div class="notice-banner info">
+            <i data-lucide="info"></i>
+            <div>
+              <strong>Profitability Metric Limitation:</strong> Profit and margins cannot be calculated from the available database tables because cost-of-goods (COGS) data is not provided in the catalog. Revenue is presented strictly as sales volume.
+            </div>
+          </div>
+
+          <div class="charts-row mt-4">
+            <!-- Category Revenue Share Chart Card -->
+            <div class="chart-card flex-1">
+              <div class="chart-card-header">
+                <h3>Revenue Contribution by Category</h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="chart-category-revenue"></canvas>
+              </div>
+            </div>
+
+            <!-- Category Units Sold Chart Card -->
+            <div class="chart-card flex-1">
+              <div class="chart-card-header">
+                <h3>Physical Units Sold by Category</h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="chart-category-units"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-card mt-4">
+            <div class="table-card-header">
+              <h3>Product Performance Index</h3>
+              <div class="table-controls">
+                <input type="text" id="product-table-search" placeholder="Search product name or category...">
+              </div>
+            </div>
+            <div class="table-wrapper">
+              <table id="table-products">
+                <thead>
+                  <tr>
+                    <th data-sort="product_name" class="sortable">Product Name <i class="sort-icon"></i></th>
+                    <th data-sort="category" class="sortable">Category <i class="sort-icon"></i></th>
+                    <th data-sort="total_units_sold" class="sortable numeric">Units Sold <i class="sort-icon"></i></th>
+                    <th data-sort="total_orders_count" class="sortable numeric">Delivered Orders <i class="sort-icon"></i></th>
+                    <th data-sort="total_recognized_revenue" class="sortable numeric">Recognized Revenue <i class="sort-icon"></i></th>
+                    <th data-sort="revenueContributionPct" class="sortable numeric">Contribution % <i class="sort-icon"></i></th>
+                    <th data-sort="revenueRank" class="sortable numeric">Rank <i class="sort-icon"></i></th>
+                  </tr>
+                </thead>
+                <tbody id="table-products-body">
+                  <!-- Data rows -->
+                </tbody>
+              </table>
+            </div>
+            <div class="table-footer">
+              <span id="product-table-summary">Showing 0 of 0 products</span>
+              <div class="pagination" id="product-table-pagination"></div>
+            </div>
+          </div>
+
+          <div class="charts-row mt-4">
+            <!-- Product Extremes Card -->
+            <div class="chart-card flex-1">
+              <div class="chart-card-header">
+                <h3>Top Selling Products (by Revenue)</h3>
+              </div>
+              <div class="ranking-list" id="top-products-container">
+                <!-- Dynamic ranking list -->
+              </div>
+            </div>
+            <div class="chart-card flex-1">
+              <div class="chart-card-header">
+                <h3>Worst Selling Products (by Revenue)</h3>
+              </div>
+              <div class="ranking-list" id="worst-products-container">
+                <!-- Dynamic ranking list -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SHEET 3: Customer Analysis -->
+        <div class="dashboard-sheet" id="sheet-customers">
+          <div class="charts-row">
+            <!-- Customer Behavior Share -->
+            <div class="chart-card flex-1">
+              <div class="chart-card-header">
+                <h3>Customer Purchasing Behavior Cohorts</h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="chart-customer-cohorts"></canvas>
+              </div>
+              <div class="cohort-legend-grid mt-4" id="cohort-descriptions-grid">
+                <!-- Explanation cards for Customer Taxonomies -->
+              </div>
+            </div>
+
+            <!-- Gender Revenue Chart -->
+            <div class="chart-card flex-1">
+              <div class="chart-card-header">
+                <h3>Revenue contribution by Customer Gender</h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="chart-gender-revenue"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-card mt-4">
+            <div class="table-card-header">
+              <h3>Top Customers Profile Index</h3>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Customer Name</th>
+                    <th>City</th>
+                    <th>Gender</th>
+                    <th class="numeric">Orders</th>
+                    <th class="numeric">Delivered</th>
+                    <th class="numeric">Recognized Spend (CLV)</th>
+                    <th class="numeric">Average Order Value (AOV)</th>
+                    <th>Highest Single Order</th>
+                  </tr>
+                </thead>
+                <tbody id="table-top-customers-body">
+                  <!-- Data rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SHEET 4: Retention & Churn -->
+        <div class="dashboard-sheet" id="sheet-retention">
+          <div class="notice-banner warning">
+            <i data-lucide="alert-triangle"></i>
+            <div>
+              <strong>Churn Metrics Disclaimer:</strong> Churn indicators represent an <em>activity-based churn-risk proxy</em> calculated using last qualifying delivered order dates. Actual business contract cancellations are not tracked in this transaction-only database.
+            </div>
+          </div>
+
+          <div class="charts-row mt-4">
+            <!-- Monthly Active Customers -->
+            <div class="chart-card flex-1">
+              <div class="chart-card-header">
+                <h3>Monthly Active Customers (MAU)</h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="chart-mau-trend"></canvas>
+              </div>
+            </div>
+            <!-- Acquisition Trends -->
+            <div class="chart-card flex-1">
+              <div class="chart-card-header">
+                <h3>Acquisition: New Signups vs First Purchases</h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="chart-acquisition-trend"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="charts-row mt-4">
+            <!-- Cohort Retention Grid -->
+            <div class="chart-card flex-2">
+              <div class="chart-card-header">
+                <h3>Signup Cohort Retention Matrix (Delivered Purchases)</h3>
+              </div>
+              <div class="cohort-matrix-wrapper mt-2">
+                <table class="cohort-table" id="table-cohort-retention">
+                  <thead>
+                    <tr>
+                      <th>Cohort Month</th>
+                      <th>Cohort Size</th>
+                      <th>Month 0</th>
+                      <th>Month 1</th>
+                      <th>Month 2</th>
+                      <th>Month 3+</th>
+                    </tr>
+                  </thead>
+                  <tbody id="table-cohort-retention-body">
+                    <!-- Dynamic rendering -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="charts-row mt-4">
+            <!-- Risk/Churn Lists -->
+            <div class="chart-card flex-1">
+              <div class="chart-card-header">
+                <h3>Customers At Churn-Risk (Inactive > 120 Days)</h3>
+              </div>
+              <div class="risk-list-wrapper">
+                <table class="risk-table">
+                  <thead>
+                    <tr>
+                      <th>Customer</th>
+                      <th>City</th>
+                      <th>Days Inactive</th>
+                    </tr>
+                  </thead>
+                  <tbody id="list-churn-risk-body">
+                    <!-- rows -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="chart-card flex-1">
+              <div class="chart-card-header">
+                <h3>Inactive Customers (Inactive > 90 Days)</h3>
+              </div>
+              <div class="risk-list-wrapper">
+                <table class="risk-table">
+                  <thead>
+                    <tr>
+                      <th>Customer</th>
+                      <th>City</th>
+                      <th>Days Inactive</th>
+                    </tr>
+                  </thead>
+                  <tbody id="list-inactive-body">
+                    <!-- rows -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SHEET 5: RFM & Affinity -->
+        <div class="dashboard-sheet" id="sheet-rfm">
+          <div class="charts-row">
+            <!-- RFM Scatter Plot -->
+            <div class="chart-card flex-2">
+              <div class="chart-card-header">
+                <h3>RFM customer segment Matrix</h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="chart-rfm-scatter"></canvas>
+              </div>
+            </div>
+
+            <!-- RFM Segment sizes -->
+            <div class="chart-card flex-1">
+              <div class="chart-card-header">
+                <h3>Segment Distributions</h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="chart-rfm-segments"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-card mt-4">
+            <div class="table-card-header">
+              <h3>RFM Customer Segment Details</h3>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Customer Segment</th>
+                    <th class="numeric">Segment Size</th>
+                    <th class="numeric">Cohort Share %</th>
+                    <th class="numeric">Avg Recency (Days)</th>
+                    <th class="numeric">Avg Frequency (Orders)</th>
+                    <th class="numeric">Avg Monetary (LTV)</th>
+                    <th class="numeric">Total Segment Revenue</th>
+                  </tr>
+                </thead>
+                <tbody id="table-rfm-summary-body">
+                  <!-- Dynamic rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="charts-row mt-4">
+            <!-- Basket analysis / Product Affinity -->
+            <div class="chart-card flex-1">
+              <div class="chart-card-header">
+                <h3>Top Product Co-Purchases (Market Basket Affinity)</h3>
+              </div>
+              <div class="affinity-list-wrapper">
+                <table class="affinity-table">
+                  <thead>
+                    <tr>
+                      <th>Product A</th>
+                      <th>Product B</th>
+                      <th class="numeric">Shared Orders</th>
+                    </tr>
+                  </thead>
+                  <tbody id="table-affinity-body">
+                    <!-- Dynamic -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Order Frequency Days Gap -->
+            <div class="chart-card flex-1">
+              <div class="chart-card-header">
+                <h3>Days Between Consecutive Orders (Purchase Cycle)</h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="chart-order-gap"></canvas>
+              </div>
+              <div class="cycle-summary-stats mt-4" id="order-cycle-stats">
+                <!-- Stats summary -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SHEET 6: Detailed Data Tables -->
+        <div class="dashboard-sheet" id="sheet-tables">
+          <!-- Tables Navigation -->
+          <div class="table-sheet-tabs">
+            <button class="sub-tab-btn active" data-subtab="customer-detail">Customers Register</button>
+            <button class="sub-tab-btn" data-subtab="order-detail">Orders Registry</button>
+          </div>
+
+          <!-- Customer Detail Table -->
+          <div class="sub-table-container active" id="subtab-customer-detail">
+            <div class="table-card">
+              <div class="table-card-header">
+                <h3>Customers Detail Master</h3>
+                <div class="table-controls">
+                  <input type="text" id="customer-detail-search" placeholder="Search ID, name, city...">
+                </div>
+              </div>
+              <div class="table-wrapper">
+                <table id="table-customer-detail">
+                  <thead>
+                    <tr>
+                      <th data-sort="customer_id" class="sortable">Customer ID <i class="sort-icon"></i></th>
+                      <th data-sort="customer_name" class="sortable">Name <i class="sort-icon"></i></th>
+                      <th data-sort="city" class="sortable">City <i class="sort-icon"></i></th>
+                      <th data-sort="gender" class="sortable">Gender <i class="sort-icon"></i></th>
+                      <th data-sort="total_orders" class="sortable numeric">Total Orders <i class="sort-icon"></i></th>
+                      <th data-sort="delivered_orders" class="sortable numeric">Delivered Orders <i class="sort-icon"></i></th>
+                      <th data-sort="recognized_spend" class="sortable numeric">Recognized Spend (LTV) <i class="sort-icon"></i></th>
+                      <th data-sort="aov" class="sortable numeric">AOV <i class="sort-icon"></i></th>
+                      <th data-sort="last_qualifying_order" class="sortable">Last Qualifying Order <i class="sort-icon"></i></th>
+                      <th data-sort="daysSinceLastOrder" class="sortable numeric">Days Since <i class="sort-icon"></i></th>
+                      <th data-sort="purchasingCohort" class="sortable">Behavior Cohort <i class="sort-icon"></i></th>
+                    </tr>
+                  </thead>
+                  <tbody id="table-customer-detail-body">
+                    <!-- rows -->
+                  </tbody>
+                </table>
+              </div>
+              <div class="table-footer">
+                <span id="customer-detail-summary">Showing 0 of 0 customers</span>
+                <div class="pagination" id="customer-detail-pagination"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Order Detail Table -->
+          <div class="sub-table-container" id="subtab-order-detail">
+            <div class="table-card">
+              <div class="table-card-header">
+                <h3>Order Transactions Registry</h3>
+                <div class="table-controls">
+                  <input type="text" id="order-detail-search" placeholder="Search Order ID, customer, city...">
+                </div>
+              </div>
+              <div class="table-wrapper">
+                <table id="table-order-detail">
+                  <thead>
+                    <tr>
+                      <th data-sort="order_id" class="sortable">Order ID <i class="sort-icon"></i></th>
+                      <th data-sort="order_date" class="sortable">Order Date <i class="sort-icon"></i></th>
+                      <th data-sort="customer_name" class="sortable">Customer <i class="sort-icon"></i></th>
+                      <th data-sort="customer_city" class="sortable">City <i class="sort-icon"></i></th>
+                      <th data-sort="order_status" class="sortable">Status <i class="sort-icon"></i></th>
+                      <th data-sort="unique_item_count" class="sortable numeric">Line Items <i class="sort-icon"></i></th>
+                      <th data-sort="total_quantity" class="sortable numeric">Total Qty <i class="sort-icon"></i></th>
+                      <th data-sort="gross_booking_value" class="sortable numeric">Gross Value <i class="sort-icon"></i></th>
+                      <th data-sort="recognized_revenue" class="sortable numeric">Recognized Spend <i class="sort-icon"></i></th>
+                      <th data-sort="net_pipeline_value" class="sortable numeric">Net Pipeline <i class="sort-icon"></i></th>
+                    </tr>
+                  </thead>
+                  <tbody id="table-order-detail-body">
+                    <!-- rows -->
+                  </tbody>
+                </table>
+              </div>
+              <div class="table-footer">
+                <span id="order-detail-summary">Showing 0 of 0 orders</span>
+                <div class="pagination" id="order-detail-pagination"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+      
+    </main>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+

@@ -9,6 +9,52 @@ This project represents the rigorous work of a Senior Data Analyst. Rather than 
 
 ---
 
+## 📊 Executive BI Interactive Analytics Dashboard
+
+The project includes a production-grade, interactive web analytics dashboard built directly on top of the SQLite database engine, database views, and recognized revenue business definitions.
+
+### 🌟 Dashboard Architecture & Tech Stack
+- **Backend API**: Node.js & Express (`dashboard/server.js`) exposing RESTful SQL endpoints over SQLite database connection.
+- **Frontend Engine**: Modular Vanilla JavaScript (`dashboard/public/app.js`), semantic HTML5, and custom responsive CSS system (`dashboard/public/style.css`).
+- **Data Visualizations**: Integrated offline `Chart.js` charts (Revenue Trends, Running Total Revenue, Category Donut & Bar Charts, Geographic Revenue Heatmap, RFM Segment Distribution, Cohort Retention Curves).
+- **Features**: Global multi-parameter filter pane (Date Range, City, Customer, Gender, Category, Product, Order Status), real-time KPI card computations, dynamic table sorting/pagination, active filter chips, CSV export, and database fallback connection safety.
+
+### 🚀 How to Launch the Dashboard
+```bash
+# Navigate to the dashboard directory
+cd dashboard
+
+# Install dependencies (Express, SQLite3)
+npm install
+
+# Start the live analytics server
+npm start
+```
+Open **[http://localhost:3000](http://localhost:3000)** in your web browser.
+
+---
+
+### 🖼️ Dashboard Preview & Interface Gallery
+
+#### 1. Overview & Sales Performance
+![Overview Header & Filters](dashboard/screenshots/dashboard_01_overview_header_filters.png)
+*Global Filter Pane with real-time multi-dimensional filter selection.*
+
+![Primary Executive KPIs](dashboard/screenshots/dashboard_02_overview_primary_kpis.png)
+*Executive Revenue Metrics (Recognized Revenue ₹3.23Cr, Gross Booking Value ₹3.96Cr, Net Pipeline Value ₹3.43Cr, AOV ₹19,576).*
+
+![Secondary KPIs & Sales Trends](dashboard/screenshots/dashboard_03_overview_secondary_kpis_trends.png)
+*Operations KPIs (2,000 Orders, 1,649 Delivered, 12% Cancellation Rate, 100% Repeat Purchase Rate) with Monthly Revenue Trend and Regional City Breakdown.*
+
+#### 2. Products & Category Analytics
+![Product Category Breakdown](dashboard/screenshots/dashboard_04_products_categories_overview.png)
+*Category Revenue Contribution (Electronics 63.4%) & Physical Unit Distribution with Product Performance Index Table.*
+
+![Top & Worst Performing Products](dashboard/screenshots/dashboard_05_products_top_worst_performers.png)
+*Top Revenue Generators (Smartphone X12, Home Theater) vs Lowest Performing Catalog Items.*
+
+---
+
 ## 🗃️ Database Schema & Data Model
 The database is structured as a transaction-focused star schema containing four core tables:
 
