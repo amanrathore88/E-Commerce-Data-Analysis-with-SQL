@@ -8,3 +8,5 @@ venv/
 .env
 node_modules/
 dashboard/node_modules/
+*.pdf
+
