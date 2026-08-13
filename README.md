@@ -53,7 +53,26 @@ Open **[http://localhost:3000](http://localhost:3000)** in your web browser.
 ![Top & Worst Performing Products](dashboard/screenshots/dashboard_05_products_top_worst_performers.png)
 *Top Revenue Generators (Smartphone X12, Home Theater) vs Lowest Performing Catalog Items.*
 
+#### 3. Customer Demographics & Behavior
+![Customer Cohorts & Gender Share](dashboard/screenshots/dashboard_06_customer_cohorts_gender.png)
+*Customer Purchasing Behavior Cohorts (80 Repeat Purchasers) & Gender Revenue Share.*
+
+![Top Customer Profile Index](dashboard/screenshots/dashboard_07_customer_top_profiles_table.png)
+*Top Customer Profile Index detailing Orders, Delivered Count, Recognized CLV, and AOV.*
+
+#### 4. Retention & Acquisition Dynamics
+![MAU & Acquisition Trends](dashboard/screenshots/dashboard_08_retention_mau_acquisition_trends.png)
+*Monthly Active Customers (MAU), New Signups vs First Purchase Trends, & Cohort Matrix.*
+
+#### 5. RFM Segmentation & Market Basket Affinity
+![RFM Segment Matrix](dashboard/screenshots/dashboard_09_rfm_segmentation_scatter_details.png)
+*RFM 2D Scatter Matrix (Monetary LTV vs Recency Inactivity) & Segment Share Table.*
+
+![Market Basket Affinity & Repeat Cycle](dashboard/screenshots/dashboard_10_affinity_co_purchases_purchase_cycle.png)
+*Top Product Co-Purchases (Market Basket Pairs) and Purchase Cycle Interval Distribution (13.85 days average order cycle).*
+
 ---
+
 
 ## 🗃️ Database Schema & Data Model
 The database is structured as a transaction-focused star schema containing four core tables:
