@@ -5,7 +5,7 @@ A comprehensive, portfolio-quality database analytics project designed for **MyS
 ---
 
 ## 📄 Project Overview
-This project represents the rigorous work of a Senior Data Analyst. Rather than simply executing generic queries, it establishes a formal metrics register, handles granularity join-multiplication risks, profiles anomalies via data quality checks, and deploys reusable views. It also features a Python validation harness that cross-reconciles multiple relational grains (line items, order headers, and customer totals) to guarantee absolute mathematical precision.
+This project represents the rigorous work of a Data Analyst. Rather than simply executing generic queries, it establishes a formal metrics register, handles granularity join-multiplication risks, profiles anomalies via data quality checks, and deploys reusable views. It also features a Python validation harness that cross-reconciles multiple relational grains (line items, order headers, and customer totals) to guarantee absolute mathematical precision.
 
 ---
 
